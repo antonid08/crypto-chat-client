@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Chat client</string>
+
+
+    <string name="username_label">Username</string>
+    <string name="password_label">Password</string>
+    <string name="login_label">Login</string>
+    <string name="choose_user">Interlocutor\'s username:</string>
+    <string name="send">Send</string>
+</resources>
