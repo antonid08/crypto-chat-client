@@ -1,6 +1,8 @@
-package com.antonid.chatclient;
+package com.antonid.chatclient.gui;
 
+import com.antonid.chatclient.R;
 import com.antonid.chatclient.api.service.ApiProvider;
+import com.antonid.chatclient.gui.chat.ChatActivity;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -38,7 +40,7 @@ public class AuthActivity extends AppCompatActivity {
             RequestBody body = RequestBody
                 .create(MediaType.parse("application/x-www-form-urlencoded"), credentials);
 
-            ApiProvider.getChatApi().login(body).enqueue(new LoginCallback());
+            ApiProvider.getAuthApi().login(body).enqueue(new LoginCallback());
         }
     }
 
@@ -49,7 +51,7 @@ public class AuthActivity extends AppCompatActivity {
             int statusCode = response.code();
 
             if (statusCode == 200) {
-                ChooseInterlocutorActivity.start(AuthActivity.this);
+                ChatActivity.start(AuthActivity.this, username.getText().toString());
             }
         }
 

@@ -13,7 +13,7 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity
-                android:name=".AuthActivity"
+                android:name=".gui.AuthActivity"
                 android:configChanges="keyboardHidden|orientation"
                 android:windowSoftInputMode="stateHidden">
             <intent-filter>
@@ -23,8 +23,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ChooseInterlocutorActivity"/>
-        <activity android:name=".ChatActivity"/>
+        <activity android:name=".gui.chat.ChatActivity"/>
     </application>
 
 </manifest>

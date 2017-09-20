@@ -14,7 +14,7 @@ public class ApiProvider {
     private static final String BASE_URL = "http://192.168.10.83:8080/";
 
     @NonNull
-    public static AuthApi getChatApi() {
+    public static AuthApi getAuthApi() {
         return getRetrofit().create(AuthApi.class);
     }
 
