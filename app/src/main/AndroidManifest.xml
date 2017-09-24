@@ -24,6 +24,7 @@
         </activity>
 
         <activity android:name=".gui.chat.ChatActivity"/>
+        <activity android:name=".gui.ChooseInterlocutorActivity"/>
     </application>
 
 </manifest>

@@ -13,28 +13,28 @@ import com.antonid.chatclient.Message;
 import com.antonid.chatclient.R;
 import com.google.gson.Gson;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-import okhttp3.WebSocket;
-import okhttp3.WebSocketListener;
+import org.java_websocket.WebSocket;
+
+import io.reactivex.functions.Consumer;
+import ua.naiksoftware.stomp.Stomp;
+import ua.naiksoftware.stomp.client.StompClient;
+
 
 public class ChatActivity extends AppCompatActivity {
 
-    private static final String USER_NAME_EXTRA = "USER_NAME_EXTRA";
+    private static final String INTERLOCUTOR_EXTRA = "INTERLOCUTOR_EXTRA";
 
-    private WebSocket chatSocket;
-    private OkHttpClient client;
-
-
-    private String username;
+    private String interlocutor;
 
     private EditText message;
     private Button send;
 
-    public static void start(Context context, String username) {
+    StompClient chatClient;
+
+
+    public static void start(Context context, String interlocutor) {
         Intent chat = new Intent(context, ChatActivity.class);
-        chat.putExtra(USER_NAME_EXTRA, username);
+        chat.putExtra(INTERLOCUTOR_EXTRA, interlocutor);
         context.startActivity(chat);
     }
 
@@ -48,46 +48,86 @@ public class ChatActivity extends AppCompatActivity {
         send = (Button) findViewById(R.id.send);
         send.setOnClickListener(new SendOnClickListener());
 
-        username = unpackUsername(getIntent());
+        interlocutor = unpackInterlocutor(getIntent());
 
-        openSocketConnection();
+        chatClient = createChatClient();
+        int i = 0;
     }
 
-    private void openSocketConnection() {
-        client = new OkHttpClient();
+    private StompClient createChatClient() {
+        chatClient = Stomp.over(WebSocket.class, "ws://192.168.0.105:8080/message/websocket");
+        chatClient.connect();
 
-        Request request = new Request.Builder().url("ws://").build();
-        EchoWebSocketListener listener = new EchoWebSocketListener();
-
-        chatSocket = client.newWebSocket(request, listener);
+        return chatClient;
     }
+/*
+    private WebSocket createSocket() {
+        WebSocket socket;
 
-    private String unpackUsername(Intent intent) {
-        return intent.getStringExtra(USER_NAME_EXTRA);
+        try {
+            socket = new WebSocketFactory().createSocket("ws://192.168.0.105:8080/message/websocket");
+        } catch (IOException e) {
+            Toast.makeText(this, "Cant create socket.", Toast.LENGTH_SHORT).show();
+            return null;
+        }
+
+
+        socket.connectAsynchronously();
+
+        return socket;
+    }*/
+
+    private String unpackInterlocutor(Intent intent) {
+        return intent.getStringExtra(INTERLOCUTOR_EXTRA);
     }
 
     private void sendMessage(Message message) {
-        chatSocket.send(new Gson().toJson(message));
+        chatClient.send("/message/to/" + interlocutor, new Gson().toJson(message)).subscribe(new Consumer<Void>() {
+            @Override
+            public void accept(Void aVoid) throws Exception {
+                int i = 0;
+            }
+        });
+
+//        chatSocket.sendText(new Gson().toJson(message));
+//        chatSocket.send(new Gson().toJson(message));
     }
 
     private class SendOnClickListener implements View.OnClickListener {
 
         @Override
         public void onClick(View view) {
-            sendMessage(new Message(username, message.getText().toString()));
+            sendMessage(new Message("usename", message.getText().toString()));
         }
     }
+/*
 
-    private final class EchoWebSocketListener extends WebSocketListener {
-
+    private final class ChatSocketListener extends WebSocketAdapter {
         @Override
-        public void onMessage(WebSocket webSocket, String text) {
-
+        public void onConnected(WebSocket websocket, Map<String, List<String>> headers) throws Exception {
+            super.onConnected(websocket, headers);
         }
 
         @Override
-        public void onFailure(WebSocket webSocket, Throwable t, Response response) {
+        public void onConnectError(WebSocket websocket, WebSocketException exception) throws Exception {
+            super.onConnectError(websocket, exception);
+        }
+
+        @Override
+        public void onBinaryMessage(WebSocket websocket, byte[] binary) throws Exception {
+            super.onBinaryMessage(websocket, binary);
+        }
+
+        @Override
+        public void onTextMessageError(WebSocket websocket, WebSocketException cause, byte[] data) throws Exception {
+            super.onTextMessageError(websocket, cause, data);
+        }
+
+        @Override
+        public void onTextMessage(WebSocket websocket, String text) throws Exception {
+            super.onTextMessage(websocket, text);
         }
     }
+*/
 
 }

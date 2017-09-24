@@ -11,7 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiProvider {
 
-    private static final String BASE_URL = "http://192.168.10.83:8080/";
+    public static final String BASE_URL = "http://192.168.0.105:8080/";
 
     @NonNull
     public static AuthApi getAuthApi() {

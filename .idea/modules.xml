@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/trpo.iml" filepath="$PROJECT_DIR$/trpo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/crypto-chat-client.iml" filepath="$PROJECT_DIR$/crypto-chat-client.iml" />
     </modules>
   </component>
 </project>

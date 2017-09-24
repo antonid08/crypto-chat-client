@@ -35,7 +35,8 @@ public class AuthActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View v) {
-            String credentials = "username=" + username.getText().toString() + "&password=" + password.getText().toString();
+            String credentials = "username=" + username.getText().toString() + "&password=" +
+                    password.getText().toString();
 
             RequestBody body = RequestBody
                 .create(MediaType.parse("application/x-www-form-urlencoded"), credentials);
@@ -51,12 +52,13 @@ public class AuthActivity extends AppCompatActivity {
             int statusCode = response.code();
 
             if (statusCode == 200) {
-                ChatActivity.start(AuthActivity.this, username.getText().toString());
+                ChooseInterlocutorActivity.start(AuthActivity.this);
             }
         }
 
         @Override
         public void onFailure(Call<ResponseBody> call, Throwable t) {
+            int i = 0;
         }
     }
 }

@@ -21,7 +21,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:lines="1"
-                android:text="user"/>
+                android:text="antonid"/>
 
         <TextView
                 android:layout_width="wrap_content"
@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="textPassword"
                 android:lines="1"
-                android:text="userPass"/>
+                android:text="12345"/>
 
         <Button
                 android:id="@+id/login"
