@@ -2,7 +2,8 @@ package com.antonid.chatclient.api.service;
 
 import com.antonid.chatclient.ChatApplication;
 import com.antonid.chatclient.api.AuthApi;
-import com.antonid.chatclient.api.SharedPreferencesCookiesManager;
+import com.antonid.chatclient.api.ChatApi;
+import com.antonid.chatclient.api.CryptoApi;
 
 import android.support.annotation.NonNull;
 import okhttp3.OkHttpClient;
@@ -11,11 +12,21 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiProvider {
 
-    public static final String BASE_URL = "http://192.168.0.105:8080/";
+    private static final String BASE_URL = "http://192.168.0.105:8080/";
 
     @NonNull
     public static AuthApi getAuthApi() {
         return getRetrofit().create(AuthApi.class);
+    }
+
+    @NonNull
+    public static ChatApi getChatApi() {
+        return getRetrofit().create(ChatApi.class);
+    }
+
+    @NonNull
+    public static CryptoApi getCryptoApi() {
+        return getRetrofit().create(CryptoApi.class);
     }
 
     @NonNull

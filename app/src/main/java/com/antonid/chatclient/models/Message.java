@@ -1,22 +1,21 @@
-package com.antonid.chatclient;
+package com.antonid.chatclient.models;
 
 
 public class Message {
 
-    private String sender;
-
+    private User sender;
     private String text;
 
-    public Message(String sender, String text) {
+    public Message(User sender, String text) {
         this.sender = sender;
         this.text = text;
     }
 
-    public String getSender() {
+    public User getSender() {
         return sender;
     }
 
-    public void setSender(String sender) {
+    public void setSender(User sender) {
         this.sender = sender;
     }
 

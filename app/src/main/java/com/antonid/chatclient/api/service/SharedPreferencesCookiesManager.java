@@ -1,11 +1,10 @@
-package com.antonid.chatclient.api;
-
-import java.util.HashSet;
-import java.util.Set;
+package com.antonid.chatclient.api.service;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
+
+import com.antonid.chatclient.api.service.CookiesManager;
 
 public class SharedPreferencesCookiesManager implements CookiesManager {
 

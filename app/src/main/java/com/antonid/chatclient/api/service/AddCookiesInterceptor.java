@@ -2,8 +2,6 @@ package com.antonid.chatclient.api.service;
 
 import java.io.IOException;
 
-import com.antonid.chatclient.api.CookiesManager;
-
 import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;

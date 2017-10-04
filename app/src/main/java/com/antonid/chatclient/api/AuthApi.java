@@ -10,4 +10,5 @@ public interface AuthApi {
 
     @POST("/login")
     Call<ResponseBody> login(@Body RequestBody credentials);
+
 }

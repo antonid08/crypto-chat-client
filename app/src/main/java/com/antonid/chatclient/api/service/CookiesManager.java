@@ -1,4 +1,4 @@
-package com.antonid.chatclient.api;
+package com.antonid.chatclient.api.service;
 
 import android.support.annotation.NonNull;
 
