@@ -14,13 +14,13 @@ import com.antonid.chatclient.models.User;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.MessageViewHolder> {
+class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.MessageViewHolder> {
 
     private User loggedUser;
 
     private List<Message> messages;
 
-    public MessagesAdapter(User loggedUser, List<Message> messages) {
+    MessagesAdapter(User loggedUser, List<Message> messages) {
         this.loggedUser = loggedUser;
         this.messages = messages != null ? messages : new ArrayList<Message>();
     }
@@ -40,7 +40,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         return messages != null ? messages.size() : 0;
     }
 
-    public void add(Message message) {
+    void add(Message message) {
         messages.add(message);
         notifyItemInserted(messages.size());
     }
@@ -59,7 +59,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.Messag
         void bind(Message message) {
             text.setText(message.getText());
 
-            if (message.getSender().equals(loggedUser)) {
+            if (loggedUser.getUsername().equals(message.getSenderUsername())) {
                 ((RelativeLayout) itemView).setGravity(Gravity.START);
             } else {
                 ((RelativeLayout) itemView).setGravity(Gravity.END);

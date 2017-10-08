@@ -3,20 +3,16 @@ package com.antonid.chatclient.models;
 
 public class Message {
 
-    private User sender;
+    private String senderUsername;
     private String text;
 
-    public Message(User sender, String text) {
-        this.sender = sender;
+    public Message(String senderUsername, String text) {
+        this.senderUsername = senderUsername;
         this.text = text;
     }
 
-    public User getSender() {
-        return sender;
-    }
-
-    public void setSender(User sender) {
-        this.sender = sender;
+    public String getSenderUsername() {
+        return senderUsername;
     }
 
     public String getText() {

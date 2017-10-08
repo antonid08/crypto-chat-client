@@ -10,10 +10,14 @@ import android.widget.EditText;
 import com.antonid.chatclient.R;
 import com.antonid.chatclient.SettingsServiceProvider;
 import com.antonid.chatclient.api.service.ApiProvider;
+import com.antonid.chatclient.api.utils.EmptyCallback;
 import com.antonid.chatclient.api.utils.HandleErrorsCallback;
 import com.antonid.chatclient.models.Encryption;
 import com.antonid.chatclient.models.Settings;
 import com.antonid.chatclient.models.User;
+import com.google.firebase.iid.FirebaseInstanceId;
+
+import java.util.Random;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -31,10 +35,10 @@ public class AuthActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.auth_activity);
 
-        if (SettingsServiceProvider.getSettingsService(AuthActivity.this).load().getLoggedUser() != null) {
+/*        if (SettingsServiceProvider.getSettingsService(AuthActivity.this).load().getLoggedUser() != null) {
             ChooseInterlocutorActivity.start(AuthActivity.this);
             finish();
-        }
+        }*/
 
         username = (EditText) findViewById(R.id.username);
         password = (EditText) findViewById(R.id.password);
@@ -65,14 +69,20 @@ public class AuthActivity extends AppCompatActivity {
         @Override
         public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
             int statusCode = response.code();
-
             if (statusCode == 200) {
+                ApiProvider.getAuthApi().setFirebaseToken(FirebaseInstanceId.getInstance()
+                        .getToken()).enqueue(new EmptyCallback<Void>(AuthActivity.this));
+
+
                 Settings settings = new Settings(new User(username.getText().toString(), Encryption.CAESAR));
                 SettingsServiceProvider.getSettingsService(AuthActivity.this).save(settings);
+
+                ApiProvider.getCryptoApi().setSymmetricKey(settings.getLoggedUser().getEncryption(), new Random().nextInt(100000));
 
                 ChooseInterlocutorActivity.start(AuthActivity.this);
                 finish();
             }
         }
+
     }
 }

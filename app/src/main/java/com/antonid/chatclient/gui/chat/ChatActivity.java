@@ -16,7 +16,7 @@ import com.antonid.chatclient.R;
 import com.antonid.chatclient.SettingsServiceProvider;
 import com.antonid.chatclient.api.service.ApiProvider;
 import com.antonid.chatclient.api.utils.HandleErrorsCallback;
-import com.antonid.chatclient.crypto.CaesarEncrypter;
+import com.antonid.chatclient.crypto.CaesarCipher;
 import com.antonid.chatclient.models.Encryption;
 import com.antonid.chatclient.models.Message;
 import com.antonid.chatclient.models.Settings;
@@ -72,8 +72,8 @@ public class ChatActivity extends AppCompatActivity {
 
     private void sendMessage(Message message) {
         if (loggedUser.getEncryption() == Encryption.CAESAR) { //todo symmetric qualifier
-            String encrypted = new CaesarEncrypter().encrypt(message.getText(), 1);
-            Message encryptedMessage = new Message(loggedUser, encrypted);
+            String encrypted = new CaesarCipher().encrypt(message.getText(), 1);
+            Message encryptedMessage = new Message(loggedUser.getUsername(), encrypted);
             ApiProvider.getChatApi().sendMessage(interlocutor, encryptedMessage)
                     .enqueue(new SendMessageCallback(this, encryptedMessage));
         }
@@ -83,7 +83,7 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View view) {
-            sendMessage(new Message(loggedUser, message.getText().toString()));
+            sendMessage(new Message(loggedUser.getUsername(), message.getText().toString()));
         }
     }
 

@@ -2,12 +2,12 @@ package com.antonid.chatclient.api;
 
 import com.antonid.chatclient.models.Encryption;
 
-import retrofit2.http.GET;
-import retrofit2.http.Path;
+import retrofit2.http.Body;
+import retrofit2.http.POST;
 
 public interface CryptoApi {
 
-    @GET("/get_symmetric_session_key/{algorithm}")
-    String getSymmetricSessionKey(@Path("algorithm") Encryption algorithm);
+    @POST("/set_symmetric_key")
+    String setSymmetricKey(@Body Encryption encryption, @Body Object key);
 
 }
