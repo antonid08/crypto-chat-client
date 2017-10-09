@@ -1,6 +1,8 @@
 package com.antonid.chatclient.api.utils;
 
 import android.content.Context;
+import android.os.CountDownTimer;
+import android.support.annotation.CallSuper;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
@@ -22,8 +24,10 @@ public abstract class HandleErrorsCallback<T> implements Callback<T> {
         this.context = context;
     }
 
+    @CallSuper
     @Override
     public void onFailure(Call<T> call, Throwable t) {
         Toast.makeText(context, R.string.api_error, Toast.LENGTH_SHORT).show();
     }
+
 }

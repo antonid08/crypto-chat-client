@@ -6,22 +6,6 @@ public class User {
 
     private Encryption encryption;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        User user = (User) o;
-
-        return username.equals(user.username);
-
-    }
-
-    @Override
-    public int hashCode() {
-        return username.hashCode();
-    }
-
     public User(String username, Encryption encryption) {
         if (username == null) {
             throw new IllegalArgumentException("Username must be not null.");
@@ -45,4 +29,21 @@ public class User {
     public void setEncryption(Encryption encryption) {
         this.encryption = encryption;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        return username.equals(user.username);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return username.hashCode();
+    }
+
 }

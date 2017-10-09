@@ -16,4 +16,8 @@ public class Settings {
         return loggedUser;
     }
 
+    public void setLoggedUser(User user) {
+        this.loggedUser = user;
+    }
+
 }

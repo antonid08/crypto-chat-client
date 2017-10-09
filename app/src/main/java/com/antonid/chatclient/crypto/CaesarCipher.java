@@ -2,12 +2,12 @@ package com.antonid.chatclient.crypto;
 
 import android.support.annotation.NonNull;
 
-public class CaesarCipher implements Cipher<Integer> {
+public class CaesarCipher implements Cipher {
 
-    public String encrypt(String input, @NonNull Integer key) {
-        if (key == null) {
-            throw new IllegalArgumentException("Key must be not null.");
-        }
+    public String encrypt(String input, @NonNull String keyString) {
+        checkKeyString(keyString);
+
+        int key = Integer.valueOf(keyString);
 
         StringBuilder result = new StringBuilder();
         int len = input.length();
@@ -18,10 +18,10 @@ public class CaesarCipher implements Cipher<Integer> {
         return result.toString();
     }
 
-    public String decrypt(String encrypted, @NonNull Integer key) {
-        if (key == null) {
-            throw new IllegalArgumentException("Key must be not null.");
-        }
+    public String decrypt(String encrypted, @NonNull String keyString) {
+        checkKeyString(keyString);
+
+        int key = Integer.valueOf(keyString);
 
         StringBuilder result = new StringBuilder();
         int len = encrypted.length();
@@ -30,6 +30,18 @@ public class CaesarCipher implements Cipher<Integer> {
             result.append(c);
         }
         return result.toString();
+    }
+
+    private void checkKeyString(String keyString) {
+        if (keyString == null) {
+            throw new IllegalArgumentException("Key must be not null.");
+        }
+
+        try {
+            int key = Integer.valueOf(keyString);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(String.format("Key string must be integer. Got: %s", keyString));
+        }
     }
 
 }

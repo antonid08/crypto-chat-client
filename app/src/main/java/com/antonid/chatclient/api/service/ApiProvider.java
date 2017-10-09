@@ -1,18 +1,20 @@
 package com.antonid.chatclient.api.service;
 
+import android.support.annotation.NonNull;
+
 import com.antonid.chatclient.ChatApplication;
 import com.antonid.chatclient.api.AuthApi;
 import com.antonid.chatclient.api.ChatApi;
 import com.antonid.chatclient.api.CryptoApi;
 
-import android.support.annotation.NonNull;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class ApiProvider {
 
-    private static final String BASE_URL = "http://192.168.100.4:8080/";
+    private static final String BASE_URL = "http:/192.168.0.105:8080/";
 
     @NonNull
     public static AuthApi getAuthApi() {
@@ -32,14 +34,15 @@ public class ApiProvider {
     @NonNull
     private static Retrofit getRetrofit() {
         OkHttpClient client = new OkHttpClient.Builder()
-            .addInterceptor(new AddCookiesInterceptor(new SharedPreferencesCookiesManager(ChatApplication.getInstance())))
-            .addInterceptor(new ReceivedCookiesInterceptor(new SharedPreferencesCookiesManager(ChatApplication.getInstance())))
-            .build();
+                .addInterceptor(new AddCookiesInterceptor(new SharedPreferencesCookiesManager(ChatApplication.getInstance())))
+                .addInterceptor(new ReceivedCookiesInterceptor(new SharedPreferencesCookiesManager(ChatApplication.getInstance())))
+                .build();
 
         return new Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(client)
-            .build();
+                .baseUrl(BASE_URL)
+                .addConverterFactory(ScalarsConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
     }
 }

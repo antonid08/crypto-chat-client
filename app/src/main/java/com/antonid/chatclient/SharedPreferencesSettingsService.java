@@ -7,10 +7,6 @@ import android.support.annotation.NonNull;
 import com.antonid.chatclient.models.Settings;
 import com.google.gson.Gson;
 
-/**
- * Created by antonid on 04.10.17.
- */
-
 class SharedPreferencesSettingsService implements SettingsService {
 
     private static final String PREFERENCES_NAME = "app_prefs";

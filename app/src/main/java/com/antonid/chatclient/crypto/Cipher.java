@@ -2,9 +2,9 @@ package com.antonid.chatclient.crypto;
 
 import android.support.annotation.NonNull;
 
-public interface Cipher<Key> {
+public interface Cipher {
 
-    String encrypt(String input, @NonNull Key key);
+    String encrypt(String input, @NonNull String key);
 
-    String decrypt(String input, @NonNull Key key);
+    String decrypt(String input, @NonNull String key);
 }

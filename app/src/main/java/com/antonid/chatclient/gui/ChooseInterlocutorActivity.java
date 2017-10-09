@@ -12,9 +12,11 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.antonid.chatclient.R;
+import com.antonid.chatclient.SettingsServiceProvider;
 import com.antonid.chatclient.api.service.ApiProvider;
-import com.antonid.chatclient.api.utils.HandleErrorsCallback;
+import com.antonid.chatclient.api.utils.LoadingDialogCallback;
 import com.antonid.chatclient.gui.chat.ChatActivity;
+import com.antonid.chatclient.models.User;
 
 import retrofit2.Call;
 import retrofit2.Response;
@@ -46,27 +48,41 @@ public class ChooseInterlocutorActivity extends AppCompatActivity {
         public void onClick(View view) {
             String interlocutorString = interlocutor.getText().toString();
 
-            if (!interlocutorString.isEmpty()) {
-                ApiProvider.getChatApi().isInterlocutorExists(interlocutorString).
-                        enqueue(new IsInterlocutorExistsCallback(ChooseInterlocutorActivity.this));
-            } else {
-                Toast.makeText(ChooseInterlocutorActivity.this, R.string.interlocutor_empty_error,
-                        Toast.LENGTH_SHORT).show();
+            if (interlocutorString.isEmpty()) {
+                Toast.makeText(ChooseInterlocutorActivity.this, R.string.interlocutor_empty_error, Toast.LENGTH_SHORT)
+                        .show();
+                return;
             }
+
+            User loggedUser = SettingsServiceProvider.getSettingsService(ChooseInterlocutorActivity.this).load()
+                    .getLoggedUser();
+            if (interlocutorString.equals(loggedUser.getUsername())) {
+                Toast.makeText(ChooseInterlocutorActivity.this, R.string.self_chat_error, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            ApiProvider.getChatApi().isInterlocutorExists(interlocutorString)
+                    .enqueue(new IsInterlocutorExistsCallback(interlocutorString, ChooseInterlocutorActivity.this));
         }
     }
 
-    private class IsInterlocutorExistsCallback extends HandleErrorsCallback<Boolean> {
+    private class IsInterlocutorExistsCallback extends LoadingDialogCallback<Boolean> {
 
-        IsInterlocutorExistsCallback(@NonNull Context context) {
+        private String interlocutor;
+
+        IsInterlocutorExistsCallback(String interlocutor, @NonNull Context context) {
             super(context);
+
+            this.interlocutor = interlocutor;
         }
 
         @Override
         public void onResponse(Call<Boolean> call, Response<Boolean> response) {
-            if (response.body()) {
-                ChatActivity.start(ChooseInterlocutorActivity.this, interlocutor.getText()
-                        .toString());
+            super.onResponse(call, response);
+
+            boolean exists = response.body();
+            if (exists) {
+                ChatActivity.start(ChooseInterlocutorActivity.this, interlocutor);
             } else {
                 Toast.makeText(ChooseInterlocutorActivity.this, R.string.no_interlocutor,
                         Toast.LENGTH_SHORT).show();

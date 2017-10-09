@@ -3,6 +3,8 @@
 
     <string name="api_error">API error</string>
 
+    <string name="ok">OK</string>
+
     <string name="username_label">Username</string>
     <string name="password_label">Password</string>
     <string name="login_label">Login</string>
@@ -10,5 +12,6 @@
     <string name="send">Send</string>
 
     <string name="interlocutor_empty_error">Interlocutor can\'t be empty</string>
+    <string name="self_chat_error">Can\'t chat with yourself</string>
     <string name="no_interlocutor">No such interlocutor</string>
 </resources>

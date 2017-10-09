@@ -4,7 +4,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
-import android.widget.RelativeLayout;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.antonid.chatclient.R;
@@ -48,21 +49,23 @@ class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.MessageViewHo
 
     class MessageViewHolder extends RecyclerView.ViewHolder {
 
+        private LinearLayout container;
         private TextView text;
 
         MessageViewHolder(ViewGroup parent) {
-            super(LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_message_item, parent));
+            super(LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_message_item, parent, false));
 
             text = (TextView) itemView.findViewById(R.id.text);
+            container = (LinearLayout) itemView.findViewById(R.id.container);
         }
 
         void bind(Message message) {
             text.setText(message.getText());
 
             if (loggedUser.getUsername().equals(message.getSenderUsername())) {
-                ((RelativeLayout) itemView).setGravity(Gravity.START);
+                container.setGravity(Gravity.START);
             } else {
-                ((RelativeLayout) itemView).setGravity(Gravity.END);
+                container.setGravity(Gravity.END);
             }
         }
     }

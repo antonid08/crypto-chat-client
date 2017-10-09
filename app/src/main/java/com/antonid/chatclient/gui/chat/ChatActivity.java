@@ -15,12 +15,16 @@ import android.widget.EditText;
 import com.antonid.chatclient.R;
 import com.antonid.chatclient.SettingsServiceProvider;
 import com.antonid.chatclient.api.service.ApiProvider;
-import com.antonid.chatclient.api.utils.HandleErrorsCallback;
-import com.antonid.chatclient.crypto.CaesarCipher;
-import com.antonid.chatclient.models.Encryption;
+import com.antonid.chatclient.api.utils.LoadingDialogCallback;
+import com.antonid.chatclient.crypto.Cipher;
+import com.antonid.chatclient.crypto.CipherProvider;
 import com.antonid.chatclient.models.Message;
 import com.antonid.chatclient.models.Settings;
 import com.antonid.chatclient.models.User;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 
@@ -32,16 +36,17 @@ public class ChatActivity extends AppCompatActivity {
 
     private static final String INTERLOCUTOR_EXTRA = "INTERLOCUTOR_EXTRA";
 
+    private static String unpackInterlocutor(Intent intent) {
+        return intent.getStringExtra(INTERLOCUTOR_EXTRA);
+    }
+
     private String interlocutor;
 
-    private RecyclerView messages;
     private MessagesAdapter messagesAdapter;
 
     private EditText message;
-    private Button send;
 
-    private Settings settings = SettingsServiceProvider.getSettingsService(this).load();
-    private User loggedUser = settings.getLoggedUser();
+    private User loggedUser;
 
     public static void start(Context context, String interlocutor) {
         Intent chat = new Intent(context, ChatActivity.class);
@@ -54,29 +59,53 @@ public class ChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat_activity);
 
-        messages = (RecyclerView) findViewById(R.id.messages);
+        Settings settings = SettingsServiceProvider.getSettingsService(this).load();
+        loggedUser = settings.getLoggedUser();
+
+        RecyclerView messages = (RecyclerView) findViewById(R.id.messages);
         messages.setLayoutManager(new LinearLayoutManager(this));
         messages.setAdapter(messagesAdapter = new MessagesAdapter(loggedUser, new ArrayList<Message>()));
 
         message = (EditText) findViewById(R.id.message);
 
-        send = (Button) findViewById(R.id.send);
+        Button send = (Button) findViewById(R.id.send);
         send.setOnClickListener(new SendOnClickListener());
 
         interlocutor = unpackInterlocutor(getIntent());
     }
 
-    private String unpackInterlocutor(Intent intent) {
-        return intent.getStringExtra(INTERLOCUTOR_EXTRA);
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
+    }
+
+
     private void sendMessage(Message message) {
-        if (loggedUser.getEncryption() == Encryption.CAESAR) { //todo symmetric qualifier
-            String encrypted = new CaesarCipher().encrypt(message.getText(), 1);
-            Message encryptedMessage = new Message(loggedUser.getUsername(), encrypted);
-            ApiProvider.getChatApi().sendMessage(interlocutor, encryptedMessage)
-                    .enqueue(new SendMessageCallback(this, encryptedMessage));
-        }
+        Cipher cipher = new CipherProvider().getCipher(loggedUser.getEncryption().getType());
+
+        String encrypted = cipher.encrypt(message.getText(),
+                loggedUser.getEncryption().getKey().getPublicKey());
+
+        Message encryptedMessage = new Message(loggedUser.getUsername(), encrypted);
+        ApiProvider.getChatApi().sendMessage(interlocutor, encryptedMessage)
+                .enqueue(new SendMessageCallback(this, message));
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void receiveMessage(MessageEvent messageEvent) {
+        Cipher cipher = new CipherProvider().getCipher(loggedUser.getEncryption().getType());
+        String decryptedString = cipher.decrypt(messageEvent.getMessage().getText(),
+                loggedUser.getEncryption().getKey().getPrivateKey());
+
+        Message decryptedMessage = new Message(messageEvent.getMessage().getSenderUsername(), decryptedString);
+        messagesAdapter.add(decryptedMessage);
     }
 
     private class SendOnClickListener implements View.OnClickListener {
@@ -87,7 +116,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    private class SendMessageCallback extends HandleErrorsCallback<Void> {
+    private class SendMessageCallback extends LoadingDialogCallback<Void> {
 
         private Message sentMessage;
 
@@ -98,6 +127,7 @@ public class ChatActivity extends AppCompatActivity {
 
         @Override
         public void onResponse(Call<Void> call, Response<Void> response) {
+            super.onResponse(call, response);
             messagesAdapter.add(sentMessage);
         }
     }
