@@ -3,9 +3,7 @@ package com.antonid.chatclient.crypto;
 
 import android.support.annotation.NonNull;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public class DesCipher implements Cipher {
 
@@ -124,178 +122,230 @@ public class DesCipher implements Cipher {
 
     @Override
     public String encrypt(String input, @NonNull String key) {
-        List<Integer> bits = toBits(input);
-        List<Integer> keyBirs = toBits(key);
+        int[] bits = append(toBits(input));
+        int[] keyBits = toBits(key);
 
-        // String outputBits = permute(bits, keyBits, false);
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < bits.length; i += 64) {
+            int[] block = new int[64];
+            System.arraycopy(bits, i, block, 0, 64);
+            result.append(fromBits(permute(block, keyBits, false)));
+        }
 
-/*        permute(outputBits, keyBits, true);*/
-        return null;
+        return result.toString();
     }
 
     @Override
-    public String decrypt(String input, @NonNull String o) {
-        return null;
+    public String decrypt(String input, @NonNull String key) {
+        int[] bits = toBits(input);
+        int[] keyBits = toBits(key);
+
+        int[] resultBits = new int[bits.length];
+        for (int i = 0; i < bits.length; i += 64) {
+            int[] block = new int[64];
+            System.arraycopy(bits, i, block, 0, 64);
+
+            int[] blockResult = permute(block, keyBits, true);
+            System.arraycopy(blockResult, 0, resultBits, i, 64);
+        }
+
+        return fromBits(detach(resultBits));
     }
 
-    private static int[][] subkey = new int[16][48];
 
-    private List<Integer> toBits(String input) {
-        String bitString = new BigInteger(input.getBytes()).toString(2);
-        List<Integer> bits = new ArrayList<>();
+    private int[] toBits(String input) {
 
-        for (byte aByte : bitString.getBytes()) {
-            bits.add((int) aByte);
+        int[] bits = new int[input.length() * 8];
+
+        for (int i = 0; i < input.length(); i++) {
+            StringBuilder s = new StringBuilder(Integer.toBinaryString((int) input.charAt(i)));
+
+            while (s.length() < 8) {
+                s.insert(0, "0");
+            }
+
+            for (int j = 0; j < 8; j++) {
+                bits[j + i * 8] = Integer.parseInt(s.charAt(j) + "");
+            }
         }
 
         return bits;
     }
 
+    private String fromBits(int[] bits) {
+        int[] bytes = new int[bits.length / 8];
 
-    private String permuteBlock(List<Integer> inputBits, List<Integer> keyBits, boolean isDecrypt) {
-/*
-        List<Integer> newBits = new ArrayList<>();
-        for (int i = 0; i < inputBits.size(); i++) {
-            newBits.add(i, inputBits.get(IP[i] - 1));
-        }
+        for (int i = 0; i < bytes.length; i++) {
+            StringBuilder bitsString = new StringBuilder();
 
-        List<Integer> left = new ArrayList<>(32);
-        List<Integer> right = new ArrayList<>(32);
-
-        int i;
-
-        List<Integer> C = new ArrayList<>(28);
-        List<Integer> D = new ArrayList<>(28);
-
-        for (i = 0; i < 28; i++) {
-            C.add(i, keyBits.get(PC1[i] - 1));
-        }
-        for (; i < 56; i++) {
-            D.add(i - 28, keyBits.get(PC1[i] - 1));
-        }
-
-        newBits.clear();
-        newBits.addAll(left);
-        newBits.addAll(right);
-
-        for (int n = 0; n < 16; n++) {
-            List<Integer> newRight;
-
-            if (isDecrypt) {
-                newRight = fiestel(right, subkey[15 - n]);
-            } else {
-                newRight = fiestel(right, KS(n, keyBits));
+            for (int j = i * 8; j < i * 8 + 8; j++) {
+                bitsString.append(bits[j]);
             }
 
-            List<Integer> newLeft = xor(left, newRight);
-            left = right;
-            right = newLeft;
+            bytes[i] = Integer.valueOf(bitsString.toString(), 2);
         }
 
-        List<Integer> output = new ArrayList<>(right);
-        output.addAll(left);
-
-        List<Integer> finalOutput = new ArrayList<>();
-
-        for (i = 0; i < 64; i++) {
-            finalOutput.add(i, output.get(FP[i] - 1));
+        StringBuilder string = new StringBuilder();
+        for (int aByte : bytes) {
+            string.append(Character.toString((char) aByte));
         }
 
-        String hex = "";
-        for (i = 0; i < 16; i++) {
-            String bin = "";
-            for (int j = 0; j < 4; j++) {
-                bin += finalOutput.get((4 * i) + j);
-            }
-            int decimal = Integer.parseInt(bin, 2);
-            hex += Integer.toHexString(decimal);
-        }
-
-        System.out.println(hex.toUpperCase());
-*/
-
-        return "";
+        return string.toString();
     }
 
-    private int[] KS(int round, int[] key) {
-/*        int C1[] = new int[28];
-        int D1[] = new int[28];
-
-        int rotationTimes = (int) rotations[round];
-
-        C1 = leftShift(C, rotationTimes);
-        D1 = leftShift(D, rotationTimes);
-
-        int CnDn[] = new int[56];
-        System.arraycopy(C1, 0, CnDn, 0, 28);
-        System.arraycopy(D1, 0, CnDn, 28, 28);
-
-        int Kn[] = new int[48];
-        for (int i = 0; i < Kn.length; i++) {
-            Kn[i] = CnDn[PC2[i] - 1];
-        }
-
-        subkey[round] = Kn;
-     *//*   C = C1; todo
-        D = D1;*//*
-        return Kn;*/
-        return new int[]{1};
-    }
-
-    private List<Integer> fiestel(List<Integer> right, List<Integer> roundKey) {
-        List<Integer> expandedRight = new ArrayList<>();
-        for (int i = 0; i < 48; i++) {
-            expandedRight.add(right.get(E[i] - 1));
-        }
-
-        List<Integer> temp = xor(expandedRight, roundKey);
-
-        return sBlock(temp);
-    }
-
-    private List<Integer> xor(List<Integer> a, List<Integer> b) {
-
-        List<Integer> result = new ArrayList<>(a.size());
-        for (int i = 0; i < a.size(); i++) {
-            result.add(a.get(i) ^ b.get(i));
-        }
+    private int[] append(int[] bits) {
+        // делим на 64 для того чтобы узнать кол-во полных блоков
+        int[] result = new int[(bits.length / 64) * 64 + 64];
+        System.arraycopy(bits, 0, result, 0, bits.length);
+        result[bits.length] = 1;
         return result;
     }
 
-    private List<Integer> sBlock(List<Integer> bits) {
-        List<Integer> output = new ArrayList<>(32);
+    private int[] detach(int[] bits) {
+        int toDetach = 0;
+        int i = bits.length - 1;
+
+        while (bits[i] != 1) {
+            toDetach++;
+            i--;
+        }
+
+        int[] result = new int[bits.length - toDetach - 1];
+        System.arraycopy(bits, 0, result, 0, result.length);
+
+        return result;
+    }
+
+
+    private int[] permute(int[] inputBits, int[] keyBits, boolean isDecrypt) {
+        int newBits[] = new int[inputBits.length];
+        for (int i = 0; i < inputBits.length; i++) {
+            newBits[i] = inputBits[IP[i] - 1];
+        }
+
+        int[][] roundKeys = generateRoundKeys(keyBits);
+
+        int L[] = new int[32];
+        System.arraycopy(newBits, 0, L, 0, 32);
+        int R[] = new int[32];
+        System.arraycopy(newBits, 32, R, 0, 32);
+
+        for (int n = 0; n < 16; n++) {
+            int newR[];
+            if (isDecrypt) {
+                newR = fiestel(R, roundKeys[15 - n]);
+            } else {
+                newR = fiestel(R, roundKeys[n]);
+            }
+            int newL[] = xor(L, newR);
+
+            L = R;
+            R = newL;
+        }
+
+        int output[] = new int[64];
+        System.arraycopy(R, 0, output, 0, 32);
+        System.arraycopy(L, 0, output, 32, 32);
+        int finalOutput[] = new int[64];
+
+        for (int i = 0; i < 64; i++) {
+            finalOutput[i] = output[FP[i] - 1];
+        }
+
+        return finalOutput;
+    }
+
+    private int[][] generateRoundKeys(int[] keyBits) {
+        int[][] subkey = new int[16][48];
+
+        int C1[];
+        int D1[];
+
+        int C0[] = new int[32];
+        int D0[] = new int[32];
+
+
+        for (int i = 0; i < 28; i++) {
+            C0[i] = keyBits[PC1[i] - 1];
+        }
+        for (int i = 28; i < 56; i++) {
+            D0[i - 28] = keyBits[PC1[i] - 1];
+        }
+
+        for (int i = 0; i < 16; i++) {
+            int rotationTimes = (int) rotations[i];
+            C1 = leftShift(C0, rotationTimes);
+            D1 = leftShift(D0, rotationTimes);
+
+            int CnDn[] = new int[56];
+            System.arraycopy(C1, 0, CnDn, 0, 28);
+            System.arraycopy(D1, 0, CnDn, 28, 28);
+
+            int Kn[] = new int[48];
+            for (int j = 0; j < Kn.length; j++) {
+                Kn[j] = CnDn[PC2[j] - 1];
+            }
+
+            subkey[i] = Kn;
+            C0 = C1;
+            D0 = D1;
+        }
+
+        return subkey;
+    }
+
+    private int[] fiestel(int[] R, int[] roundKey) {
+        int expandedR[] = new int[48];
+        for (int i = 0; i < 48; i++) {
+            expandedR[i] = R[E[i] - 1];
+        }
+        int temp[] = xor(expandedR, roundKey);
+        int output[] = sBlock(temp);
+        return output;
+    }
+
+    private int[] xor(int[] a, int[] b) {
+        int answer[] = new int[a.length];
+        for (int i = 0; i < a.length; i++) {
+            answer[i] = a[i] ^ b[i];
+        }
+        return answer;
+    }
+
+    private int[] sBlock(int[] bits) {
+        int output[] = new int[32];
 
         for (int i = 0; i < 8; i++) {
+            int row[] = new int[2];
+            row[0] = bits[6 * i];
+            row[1] = bits[(6 * i) + 5];
+            String sRow = row[0] + "" + row[1];
 
-            List<Integer> row = new ArrayList<>(2);
-            row.add(bits.get(6 * i));
-            row.add(bits.get((6 * i) + 5));
-            String sRow = row.get(0) + "" + row.get(1);
-
-            ArrayList<Integer> column = new ArrayList<>(4);
-            column.add(bits.get((6 * i) + 1));
-            column.add(bits.get((6 * i) + 2));
-            column.add(bits.get((6 * i) + 3));
-            column.add(bits.get((6 * i) + 4));
-            String sColumn = column.get(0) + "" + column.get(1) + "" + column.get(2) + ""
-                    + column.get(3);
+            int column[] = new int[4];
+            column[0] = bits[(6 * i) + 1];
+            column[1] = bits[(6 * i) + 2];
+            column[2] = bits[(6 * i) + 3];
+            column[3] = bits[(6 * i) + 4];
+            String sColumn = column[0] + "" + column[1] + "" + column[2] + "" + column[3];
 
             int iRow = Integer.parseInt(sRow, 2);
             int iColumn = Integer.parseInt(sColumn, 2);
             int x = S[i][(iRow * 16) + iColumn];
 
-            String s = Integer.toBinaryString(x);
+            StringBuilder s = new StringBuilder(Integer.toBinaryString(x));
+
             while (s.length() < 4) {
-                s = "0" + s;
+                s.insert(0, "0");
             }
-            for (int j = 0; j < 4; j++) { //todo check
-                output.set((i * 4) + j, Integer.parseInt(s.charAt(j) + ""));
+
+            for (int j = 0; j < 4; j++) {
+                output[(i * 4) + j] = Integer.parseInt(s.charAt(j) + "");
             }
         }
 
-        List<Integer> finalOutput = new ArrayList<>(32);
+        int finalOutput[] = new int[32];
         for (int i = 0; i < 32; i++) {
-            finalOutput.add(output.get(P[i] - 1));
+            finalOutput[i] = output[P[i] - 1];
         }
         return finalOutput;
     }
@@ -305,9 +355,8 @@ public class DesCipher implements Cipher {
         System.arraycopy(bits, 0, answer, 0, bits.length);
         for (int i = 0; i < n; i++) {
             int temp = answer[0];
-            for (int j = 0; j < bits.length - 1; j++) {
-                answer[j] = answer[j + 1];
-            }
+            System.arraycopy(answer, 1, answer, 0, bits.length - 1);
+
             answer[bits.length - 1] = temp;
         }
         return answer;
